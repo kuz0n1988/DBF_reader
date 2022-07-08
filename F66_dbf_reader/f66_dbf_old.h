@@ -95,13 +95,12 @@ public:
 
     QList<std::string>      getTable          ();    // Таблица формируется по схеме row * i + column
     std::string             getElement        (const unsigned int &row, const unsigned int &col);
-    std::string             getElementFromFile(const unsigned int &row, const unsigned int &col);   // Мой код не в состоянии переварить файл
-    // в котором 121'464 и 31 столбец. Возможно, потому что я наплодил слишком много сущностей
+    std::string             getElementFromFile(const uint32_t &row, const uint8_t &col);
+    // Мой код не в состоянии переварить файл, в котором 121'464 строк и 31 столбец.
+    // Возможно, потому что я наплодил слишком много сущностей
     // а возможно, потому что в этом грёбаном массиве больше 3млн значений, а значит я натыкаюсь
     // на переполнение переменной типа int
     // попробую вытягивать данные адресно непосредственно из файла
-
-
 };
 
 #endif // F66_DBF_OLD_H

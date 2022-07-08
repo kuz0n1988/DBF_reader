@@ -1,5 +1,4 @@
 #include "f66_dbf_reader.h"
-#include "f66_dbf_toqbytearray.h"
 
 #include "f66_dbf_old.h"    // эксперементальная библевотека
 
