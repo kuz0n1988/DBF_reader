@@ -105,21 +105,24 @@ std::string DBFTitle::getLastModifiedDate() const
 {
     std::string date_t = "";
 
+    // ===== день
     if(m_lastmodified_d < 10)
         date_t += "0";
     date_t += std::to_string(m_lastmodified_d) + ".";
 
+    // ===== месяц
     if(m_lastmodified_m < 10)
         date_t += "0";
     date_t += std::to_string(m_lastmodified_m) + ".";
 
+    // ===== год
     // формат появился на свет в 1983-м году
     // надеюсь, он умрёт до 2083-го.
     if(m_lastmodified_y > 83)
         date_t += "19";
     else
         date_t += "20";
-    if((m_lastmodified_y < 10))
+    if(m_lastmodified_y < 10)
         date_t += "0";
     date_t += std::to_string(m_lastmodified_y);
 

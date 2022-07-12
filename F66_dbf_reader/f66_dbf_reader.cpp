@@ -33,7 +33,6 @@
 #include <string>
 #include <Windows.h>
 
-// дебажим всякий кал
 #include <QDebug>
 
 bool F66_DBF_Reader::checkFileName(const QString &filepath)
@@ -117,13 +116,13 @@ void F66_DBF_Reader::slot_toF66_DBF_Old()
        return;
     }
 
-    m_ptxe_status->append("Trying to open " + m_pled_filename->text() + " in raw-format...");
+    m_ptxe_status->setPlainText("Trying to open " + m_pled_filename->text() + " in raw-format...");
     try
     {
         F66_DBF_Old dbf_file (m_pled_filename->text());
 
         // пытаюсь переварить гигантскую таблицу через костыли
-        QList<std::string> tmp_cells = dbf_file.getTable();
+        //QList<std::string> tmp_cells = dbf_file.getTable();
 
         // ----- Уничтожаем старую таблицу и строим на её месте новую
         delete m_ptwd_table;
@@ -157,25 +156,25 @@ void F66_DBF_Reader::slot_toF66_DBF_Old()
 
         for(uint32_t i = 0; i < dbf_file.getRowsCount(); i++)
         {
-            qDebug() << "Line : " << i;
+            //m_ptxe_status->append("Reading line : " + QString::number(i));
             // У файла, в котором 121'484 запись без этой проверки начинаются проблемы
-            if(tmp_cells.isEmpty())
+            /*if(tmp_cells.isEmpty())
             {
                 qDebug() << "Break on line: " << i;
                 break;
-            }
+            }*/
 
             for(uint8_t j = 0; j < dbf_file.getColumnsCount(); j++)
             {
                 // У файла, в котором 121'484 запись без этой проверки начинаются проблемы
-                if(tmp_cells.isEmpty())
+                /*if(tmp_cells.isEmpty())
                 {
                     qDebug() << "Break on " << i << ", " << j << " idx: " << i * dbf_file.getColumnsCount() + j;
                     break;
-                }
+                }*/
 
-                stmp = tmp_cells.first();
-                tmp_cells.pop_front();
+                stmp = dbf_file.getElementFromFile(i, j);
+                //tmp_cells.pop_front();
                 temp = QByteArray(stmp.c_str());
                 m_ptwd_table->setItem(i, j, new QTableWidgetItem(codec866->toUnicode(temp) ));
             }

@@ -54,6 +54,13 @@ F66_DBF_Old::F66_DBF_Old(const QString &filepath) : m_filepath(filepath.toStdStr
             throw "DBF-file is broken!";
 
         // ===== Формируем таблицу элементов (но по сути одномерный массив)
+/*        for(uint32_t i = 0; i < rows; i++)
+            for(uint8_t j = 0; j < columns; j++)            
+                m_table.push_back(getElementFromFile(i, j));*/
+
+        /* Предыдущие три строчки кода делают почти всё тоже самое
+         * (кроме проверки на флаг удаления)
+         *
         std::string      cell;  // это непосредственно для изъятия данных
         uint16_t         j_pos; // для отслеживания позиции текущего блока
         size_t           num;   // размер ячейки в байтах (для упрощения кода)
@@ -61,15 +68,6 @@ F66_DBF_Old::F66_DBF_Old(const QString &filepath) : m_filepath(filepath.toStdStr
         size = m_title.getRowSize();
         memblock = new char [size];
 
-        for(uint32_t i = 0; i < rows; i++)
-        {
-            for(uint8_t j = 0; j < columns; j++)
-            {
-                m_table.push_back(getElementFromFile(i, j));
-            }
-        }
-
-/*!!!!! проверяю говнокод
         // ----- Начинаем с первой строки
         for(uint32_t i = 0; i < rows; i++)
         {
@@ -107,19 +105,18 @@ F66_DBF_Old::F66_DBF_Old(const QString &filepath) : m_filepath(filepath.toStdStr
         }
 
         delete [] memblock;
-*!!!!!проверяю говнокод */
+*/
 
-
-
-        // Проверяем, действительно ли мы добрались до конца файла
+        // Проверяем значение последнего байта.
         // Последний байт должен быть 0x1A. Если это не так
         // значит либо я дебил, либо (скорее всего) - файл битый
-/*        file.read(&byte, 1);
+        file.seekg(-1, file.end);
+        file.read(&byte, 1);
         if(byte != 0x1A)
         {
             file.close();
             throw std::string("This is bullshit! ") + byte + std::string(" can't be a last byte of DBF-file!");
-        }*/
+        }
 
         file.close();
     }
@@ -156,16 +153,21 @@ char F66_DBF_Old::getColumnType(const int &col)
 uint8_t F66_DBF_Old::getColumnLength(const int &col)
 {    return m_descriptors.at(col).getLength();  }
 
+// Геттер для всей таблицы (уж если приспичит)
 QList<std::string> F66_DBF_Old::getTable()
 {
-    return m_table;
+    QList<std::string> table;
+    for(uint32_t i = 0; i < getRowsCount(); i++)
+        for(uint8_t j = 0; j < getColumnsCount(); j++)
+            table.push_back(getElementFromFile(i, j));
+
+    return table;
 }
 
-// Геттер для всей таблицы
 std::string F66_DBF_Old::getElement(const unsigned int &row, const unsigned int &col)
 {
-    std::string temp = m_table.at(row * m_title.getColumnsCount() + col);
-    return temp;
+    //std::string temp = m_table.at(row * m_title.getColumnsCount() + col);
+    return getElementFromFile(row, col);
 }
 
 std::string F66_DBF_Old::getElementFromFile(const uint32_t &row, const uint8_t &col)
@@ -174,18 +176,14 @@ std::string F66_DBF_Old::getElementFromFile(const uint32_t &row, const uint8_t &
      * длина_титула + номер_ряда * длина_ряда + байт_удаления(1) + длина_предыдущих_ячеек_в_строке
      * */
     std::ifstream file(m_filepath, std::ios::in | std::ios::binary);
-    std::streampos pos;                                     // позиция курсора
-    std::streampos size_title   = m_title.getTitleSize();   // длина титульника
-    std::streampos size_row     = getRowSize();             // длина ряда
-    std::streampos size_cell    = getColumnLength(col);     // длина искомой ячейки
-    std::streampos size_before  = 1;                        // длина предыдущих ячеек в строке (1 - для нулевой колонки)
-    char *memblock = new char[size_cell];                   // прокладка между ifstream и std::string
-    std::string result;                                     // результат
-    result.resize(size_cell);
+    std::streampos pos;                 // позиция курсора
+    std::streampos size_before  = 1;    // длина предыдущих ячеек в строке (1 - для нулевой колонки)
+    std::string result;                 // результат
+    result.resize(getColumnLength(col));
 
     // проверка на адекватность введённого запроса
     if(row > getRowsCount() || col > getColumnsCount())
-        throw std::string("Element " + std::to_string(row) + ", " + std::to_string(col) + "is out of range");
+        throw std::string("Element " + std::to_string(row) + ", " +  std::to_string(col) + "is out of range");
 
     if(file.is_open())
     {
@@ -194,13 +192,12 @@ std::string F66_DBF_Old::getElementFromFile(const uint32_t &row, const uint8_t &
             size_before += getColumnLength(i);
 
         // рассчёт позиции курсора
-        pos = size_title + row * size_row + size_before;
+        pos = m_title.getTitleSize() + row * getRowSize() + size_before;
 
         // считываем данные по указанному адресу
         // молимся, чтобы не напороться на переполнение
         file.seekg(pos);
-        file.read(memblock, size_cell);
-        memcpy(&result[0], memblock, size_cell);
+        file.read(&result[0], getColumnLength(col));
 
         return std::string(result);
     }
