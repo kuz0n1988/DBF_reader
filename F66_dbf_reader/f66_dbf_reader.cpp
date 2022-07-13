@@ -1,6 +1,5 @@
 #include "f66_dbf_reader.h"
-
-#include "f66_dbf_old.h"    // эксперементальная библевотека
+#include "f66_dbf_old.h"
 
 // Рамочки для гуи
 #include <QHBoxLayout>
@@ -12,19 +11,15 @@
 #include <QLineEdit>    // адресная строка
 #include <QTextEdit>    // логи
 #include <QTableWidget> // таблица с БД
-#include <QPushButton>  // кнопка "открыть
+#include <QPushButton>  // кнопка "открыть"
 
 // Для работы с файлами + эксперименты всякие
 #include <QFile>        // тупо файл
 #include <QFileInfo>    // чтобы не парсить адресную строку
-//#include <QTextStream>  // тупо поток для файла
-//#include <QDataStream>  // последствия опытов
 #include <QTextCodec>   // для CP866
-#include <QByteArray>
 
 // Это чтобы всё не развалилось
 #include <QString>
-#include <QChar>
 #include <QList>
 
 // STL-библиотеки
@@ -121,9 +116,6 @@ void F66_DBF_Reader::slot_toF66_DBF_Old()
     {
         F66_DBF_Old dbf_file (m_pled_filename->text());
 
-        // пытаюсь переварить гигантскую таблицу через костыли
-        //QList<std::string> tmp_cells = dbf_file.getTable();
-
         // ----- Уничтожаем старую таблицу и строим на её месте новую
         delete m_ptwd_table;
         m_ptwd_table = new QTableWidget(dbf_file.getRowsCount(), dbf_file.getColumnsCount());
@@ -146,7 +138,6 @@ void F66_DBF_Reader::slot_toF66_DBF_Old()
             DBFDescriptor dscrp = dbf_file.getDBFDescriptors().at(i);
             m_ptxe_status->append("\nColumn descriptor idx: " + QString::number(i));
             m_ptxe_status->append(QString::fromStdString(dscrp.getDescriptorInfo()));
-            qDebug () << "Descriptor " << i << ":\n" << QString::fromStdString(dscrp.getDescriptorInfo());
         }
 
         // Без этого будем смотреть на козяблики
@@ -156,25 +147,9 @@ void F66_DBF_Reader::slot_toF66_DBF_Old()
 
         for(uint32_t i = 0; i < dbf_file.getRowsCount(); i++)
         {
-            //m_ptxe_status->append("Reading line : " + QString::number(i));
-            // У файла, в котором 121'484 запись без этой проверки начинаются проблемы
-            /*if(tmp_cells.isEmpty())
-            {
-                qDebug() << "Break on line: " << i;
-                break;
-            }*/
-
             for(uint8_t j = 0; j < dbf_file.getColumnsCount(); j++)
             {
-                // У файла, в котором 121'484 запись без этой проверки начинаются проблемы
-                /*if(tmp_cells.isEmpty())
-                {
-                    qDebug() << "Break on " << i << ", " << j << " idx: " << i * dbf_file.getColumnsCount() + j;
-                    break;
-                }*/
-
                 stmp = dbf_file.getElementFromFile(i, j);
-                //tmp_cells.pop_front();
                 temp = QByteArray(stmp.c_str());
                 m_ptwd_table->setItem(i, j, new QTableWidgetItem(codec866->toUnicode(temp) ));
             }

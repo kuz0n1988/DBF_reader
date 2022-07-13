@@ -1,0 +1,151 @@
+Памятка для работы с DBF-файлами (а то я весь код загадил комментами)
+Инфа разнится от источника к источнику. Вроде как в седьмом стандарте даже размер титульника вырос в два раза.
+
+Сюда буду сбрасывать описание из источникам, инфа в которых соответствовала моим файлам и.
+Соответственно, по ним же я буду писать код.
+
+Примечание: файл, в котором больше 100к записей обрабатывается очень долго. (LibreOffice умудряется это делать в 5 раз быстрее)
+
+/* DBF-структура файла (вроде по пятому стандарту)
+ *
+ * // =====Заголовок файла=====
+ * byte [0]:    0-2 bits - версия
+ *              3   bit  - наличие БД для файла памятки DOS
+ *              4-6 bit  - наличие таблицы SQL
+ *              7   bit  - наличие любого файла-памятки
+ * byte [1-3]:  Дата последнего обновления YYMMDD (3 байта)
+ * byte [4-7]:  Количество записей в файле (32-разрядное число)
+ * byte [8-9]:  Количество байтов в заголовке (16-разрядное число)
+ * byte [10-11]:Количество байтов в одной записи (16-разрядное число)
+ * byte [12-13]:RESERVED (0)
+ * byte [14]:   Незавершенная транзакция (bool)
+ * byte [15]:   Флаг шифрования (bool)
+ * byte [16-27]:RESERVED (0)
+ * byte [28]:   Наличие файла production.mdx (bool)
+ * byte [29]:   Идентификатор языкового драйвера (в Ф66 - нули)
+ * byte [30-31]:RESERVED (0)
+ * byte [32-n]: Массив дескрипторов полей
+ * byte [n+1]:  Конец дескриптора полей 0x0D (13)
+ *
+ * Каждая новая запись начинается с: 0x20 - если запись активна (32 он же пробел)
+ *                                   0x2A - если запись удалена (42, как иронично)
+ * Конец заголовка файла:            0x0D (13)
+ * Конец вообще всего файла:         0x1A (26)
+ *
+ * // =====Массив дескрипторов полей=====
+ * По википедии:
+ * byte [n+0–n+10]:     Имя поля в ASCII 11 байт
+ * byte [n+11]:         Тип поля. (C, D, F, L, M, или N)
+ * byte [n+12–n+15]:	RESERVED (0)
+ * byte [n+16]:         Длина поля в двоичном формате (максимум 254 (0xFE)).
+ * byte [n+17]:         Десятичное число полей в двоичном формате (хуита какая-то, в Ф66 нуль стоит)
+ * byte [n+18–n+19]:	Идентификатор рабочей зоны 2 байта (чего?)
+ * byte [n+20]:         Пример (чеггоооо? Но я так понимаю, что bool)
+ * byte [n+21–n+30]:	RESERVED (0)
+ * byte [n+31]:         1 байт	Флаг производственного многомерного поля (bool, но мне он нахер не нужен)
+ *
+ * По http://www.independent-software.com/dbase-dbf-dbt-file-format.html
+ * 0-10     0x00	11	string	Field name (padded with NULL-bytes) +
+ * 11       0x0b	1	char	Field type                          +
+ * 12-15    0x0c	4	uint32  Field data address in memory        -
+ * 16       0x10	1	byte	Field length                        +
+ * 17       0x11	1	byte	Field decimal count                 ?
+ * 18-19    0x12	2           Reserved for dBASE IIIPlus/LAN
+ * 20       0x14	1	byte    Work area ID                        -
+ * 21-22    0x15	2           Reserved for dBASE IIIPlus/LAN
+ * 23       0x17	1	byte    SET FIELDS flag
+ * 24-31    0x18	8           Reserved                            +
+ *
+ * // =====Типы полей=====
+ * С - char[] в формате ASCII
+ * D - дата 8 цифр YYYYMMDD
+ * F - float/double
+ * L - bool (Y,y,T,t - true; N,n,F,f - false; ? - неинициализирован(NaN))
+ * M - памятка (10 цифр)
+ * N - число (int или long)
+ * */
+
+========== DBF-Title ==========
+
+/* Конструктор принимает (предполагается, что из потока) первые 32 бита
+ * dbf-файла и раскладывает их по этой схеме:
+ *
+ * byte [0]:    0-2 bits - версия
+ *              3   bit  - наличие БД для файла памятки DOS
+ *              4-6 bit  - наличие таблицы SQL
+ *              7   bit  - наличие любого файла-памятки
+ * byte [1-3]:  Дата последнего обновления YYMMDD (3 байта)
+ * byte [4-7]:  Количество записей в файле (32-разрядное число)
+ * byte [8-9]:  Количество байтов в заголовке (16-разрядное число)
+ * byte [10-11]:Количество байтов в одной записи (16-разрядное число)
+ * byte [12-13]:RESERVED (0)
+ * byte [14]:   Незавершенная транзакция (bool)
+ * byte [15]:   Флаг шифрования (bool)
+ * byte [16-27]:RESERVED (0)
+ * byte [28]:   Наличие файла production.mdx (bool)
+ * byte [29]:   Идентификатор языкового драйвера (в Ф66 - нули)
+ * byte [30-31]:RESERVED (0)
+ */
+
+// Количество столбцов не дано, но мы можем их вычислить
+// потому что знаем общую длину заголовка, размер титула (32 байта)
+// размер инфы в заголовке для одного столбца (32) и один закрывающий
+// байт 0x0D (m_title_size - 32 - 1) / 32;
+
+========== DBF-Descriptor ==========
+/* По http://www.independent-software.com/dbase-dbf-dbt-file-format.html
+ * 0-10     0x00	11	string	Field name (padded with NULL-bytes) +
+ * 11       0x0b	1	char	Field type                          +
+ * 12-15    0x0c	4	uint32  Field data address in memory        -
+ * 16       0x10	1	byte	Field length                        +
+ * 17       0x11	1	byte	Field decimal count                 ?
+ * 18-19    0x12	2       Reserved for dBASE IIIPlus/LAN
+ * 20       0x14	1	byte    Work area ID                        -
+ * 21-22    0x15	2       Reserved for dBASE IIIPlus/LAN
+ * 23       0x17	1	byte    SET FIELDS flag
+ * 24-31    0x18	8       Reserved                            +
+ */
+
+===== field types:
+/*  C	Character	A string of characters, padded with spaces if shorter than the field length
+    D	Date		Date stored as string in YYYYMMDD format
+    F	Float		Floating point number, stored as string, padded with spaces if shorter than the field length
+    N	Numeric		Floating point number, stored as string, padded with spaces if shorter than the field length
+    L	Logical		A boolean value, stored as one of YyNnTtFf. May be set to ? if not initialized
+
+    Visual FoxPro field types:
+    T	DateTime	A date and time, stored as a number (see below, under record reading)
+    I	Integer     Integer value, stored as a little endian 32-bit value, with the highest bit used to negate numbers
+    Y	Currency	Floating point number, stored as binary in (usually) 8 bytes.
+
+    M	Memo        Index of memo block in accompanying memo file, stored as either a string padded with spaces or a binary uint32 value
+ * */
+
+======== ПРОВЕРКА НАЛИЧИЯ ФЛАГА "УДАЛЕНИЯ" ========
+ *
+ * У меня был здоровенный кусок плохо работающего кода, из
+ * которого было бы неплохо куда-нибудь применить вот
+ * этот алгоритм
+
+        // Каждая запись начинается с 1-байтового флага "удаления":
+        // - если запись активна: 0x20 - выполняем цикл
+        // - если запись удалена: 0x2A - нахер пропускаем всё это дерьмо
+        // - если неведомая херня - выкидываем ошибку
+
+        if      (memblock[0] == 0x2A)
+            break;
+        else if (memblock[0] != 0x20)
+        {
+            delete [] memblock;
+            file.close();
+            throw std::string("This is bullshit! The row can't begin from character ") + memblock[0];
+        }
+        else
+        {
+        }
+
+======== ПРОВЕРКА НАЛИЧИЯ ФЛАГА "УДАЛЕНИЯ" ========
+
+========== Закрывающий байт для файла ==========
+// Последний байт должен быть 0x1A. Если это не так
+// значит либо я дебил, либо (скорее всего) - файл битый

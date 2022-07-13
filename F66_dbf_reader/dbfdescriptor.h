@@ -10,9 +10,7 @@ private:
     // самое важное
     uint8_t     m_length;   // max: 254 (0xFE)
     char        m_name [11];
-    char        m_type;     // C, D, F, L, M, или N
-    // в доках были описаны ещё куча дополнительных типов,
-    // но их у нас нет, так что ебись они конём
+    char        m_type;
 
     // он есть, но он нахер не нужен
     uint32_t    m_address_in_memory;

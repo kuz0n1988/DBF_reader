@@ -13,12 +13,11 @@ private:
     uint8_t     m_lastmodified_m;
     uint8_t     m_lastmodified_d;
     uint32_t    m_rows_count;
+    uint8_t     m_cols_count;
     uint16_t    m_title_size;
     uint16_t    m_row_size;
 
-    // вот эти вот ребята скорее всего никогда не понадобятся
-    // в нашей древней базе этих флагов нигде не найти, хотя
-    // в спецификации описаны, так что пусть будут.
+    // скорее всего не понадобятся:
     bool m_incomplete_transaction;
     bool m_crypting_flag;
     bool m_productionmdx;
@@ -35,6 +34,7 @@ public:
     uint8_t     getColumnsCount()       const;  // максимум 255
     uint16_t    getTitleSize()          const;
     uint16_t    getRowSize()            const;
+    bool        getMemoFlag()           const;
 };
 
 #endif // DBFTITLE_H

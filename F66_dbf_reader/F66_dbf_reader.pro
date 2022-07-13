@@ -13,15 +13,20 @@ SOURCES += \
     dbftitle.cpp \
     f66_dbf_old.cpp \
     main.cpp \
-    f66_dbf_reader.cpp
+    f66_dbf_reader.cpp \
+    dbfmemo.cpp
 
 HEADERS += \
     dbfdescriptor.h \
     dbftitle.h \
     f66_dbf_old.h \
-    f66_dbf_reader.h
+    f66_dbf_reader.h \
+    dbfmemo.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+DISTFILES += \
+    dbf_docs
