@@ -149,7 +149,7 @@ void F66_DBF_Reader::slot_toF66_DBF_Old()
         {
             for(uint8_t j = 0; j < dbf_file.getColumnsCount(); j++)
             {
-                stmp = dbf_file.getElementFromFile(i, j);
+                stmp = dbf_file.getElement(i, j);
                 temp = QByteArray(stmp.c_str());
                 m_ptwd_table->setItem(i, j, new QTableWidgetItem(codec866->toUnicode(temp) ));
             }

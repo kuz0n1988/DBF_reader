@@ -9,16 +9,22 @@
 
 #include "dbftitle.h"       // класс для заголовка
 #include "dbfdescriptor.h"  // класс для дескриптора (описание колонки)
+#include "dbfmemo.h"        //
 
 class F66_DBF_Old
 {
-private:
+private:    // члены
     DBFTitle                m_title;
     QList<DBFDescriptor>    m_descriptors;
     const std::string       m_filepath;
+    DBFMemo                *m_memo = nullptr;
+
+private:    // методы
+    std::string             getElementFromFile(const uint32_t &row, const uint8_t &col);
 
 public:
     F66_DBF_Old(const QString &filepath);
+    ~F66_DBF_Old();
 
     // Геттеры для m_title
     DBFTitle                getDBFTitle      ();
@@ -35,7 +41,7 @@ public:
 
     QList<std::string>      getTable          ();    // Таблица формируется по схеме row * i + column
     std::string             getElement        (const unsigned int &row, const unsigned int &col);
-    std::string             getElementFromFile(const uint32_t &row, const uint8_t &col);
+
 };
 
 #endif // F66_DBF_OLD_H

@@ -1,9 +1,9 @@
 #include "f66_dbf_old.h"
 
+
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <cstdint>
 #include <stdlib.h>
 
 #include <QDebug>
@@ -35,6 +35,10 @@ F66_DBF_Old::F66_DBF_Old(const QString &filepath) : m_filepath(filepath.toStdStr
         }
         delete [] memblock;
 
+        // ===== При наличии MEMO-файла создаём соответствующий объект
+        if(m_title.getMemoFlag())
+            m_memo = new DBFMemo(m_filepath);
+
         // Вот тут проверяем наличие закрывающего байта 0x0D.
         file.read(&byte, 1);
         if(byte != 0x0D)
@@ -53,6 +57,14 @@ F66_DBF_Old::F66_DBF_Old(const QString &filepath) : m_filepath(filepath.toStdStr
     }
     else
         throw "Can't open file";
+}
+
+F66_DBF_Old::~F66_DBF_Old()
+{
+    if(m_memo != nullptr)
+        delete m_memo;
+
+    qDebug() << "DBF_Old - deleted";
 }
 
 // Геттеры для DBFTitle
@@ -96,7 +108,12 @@ QList<std::string> F66_DBF_Old::getTable()
 }
 
 std::string F66_DBF_Old::getElement(const unsigned int &row, const unsigned int &col)
-{    return getElementFromFile(row, col);   }
+{
+    if(row < getRowsCount() && col < getColumnsCount())
+        return getElementFromFile(row, col);
+    else
+        throw "Out of range exception in getElement()";
+}
 
 std::string F66_DBF_Old::getElementFromFile(const uint32_t &row, const uint8_t &col)
 {
@@ -127,7 +144,12 @@ std::string F66_DBF_Old::getElementFromFile(const uint32_t &row, const uint8_t &
         file.seekg(pos);
         file.read(&result[0], getColumnLength(col));
 
-        return std::string(result);
+        /*
+        if(getColumnType(col) == 'M')
+            DBFMemo memo(m_filepath);
+            */
+
+        return result;
     }
     else
         throw "Can't open file";
