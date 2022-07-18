@@ -41,6 +41,7 @@ public:
 
     QList<std::string>      getTable          ();    // Таблица формируется по схеме row * i + column
     std::string             getElement        (const unsigned int &row, const unsigned int &col);
+    bool                    rowDeleteStatus(const uint32_t &row);
 
 };
 

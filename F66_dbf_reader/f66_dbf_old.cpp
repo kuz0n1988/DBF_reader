@@ -1,6 +1,5 @@
 #include "f66_dbf_old.h"
 
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -39,7 +38,7 @@ F66_DBF_Old::F66_DBF_Old(const QString &filepath) : m_filepath(filepath.toStdStr
         if(m_title.getMemoFlag())
             m_memo = new DBFMemo(m_filepath);
 
-        // Вот тут проверяем наличие закрывающего байта 0x0D.
+        // Вот тут проверяем наличие закрывающего байта 0x0D для титульника.
         file.read(&byte, 1);
         if(byte != 0x0D)
             throw "DBF-file title is broken!";
@@ -155,4 +154,32 @@ std::string F66_DBF_Old::getElementFromFile(const uint32_t &row, const uint8_t &
         throw "Can't open file";
 
     return "ZAGLUSHKA!";
+}
+
+bool F66_DBF_Old::rowDeleteStatus(const uint32_t &row)
+{
+    // проверка на адекватность введённого запроса
+    if(row > getRowsCount())
+        throw std::string("Row " + std::to_string(row) + "is out of range");
+
+    // адрес = длина_титула + номер_ряда * длина_ряда
+    std::streampos pos = getTitleSize() + row * getRowSize();
+    std::ifstream file(m_filepath, std::ios::in | std::ios::binary);
+    char byte;
+
+    if(file.is_open())
+    {
+        file.seekg(pos);
+        file.read(&byte, 1);
+        file.close();
+    }
+    else
+        throw "Can't open file";
+
+    if      (byte == 0x20)
+        return false;
+    else if (byte == 0x2A)
+        return true;
+    else
+        throw "Wrong data on position of row's deletion-byte.\nDBF-file can be broken, or programmist-dolboyob, or format does not support.";
 }

@@ -141,19 +141,29 @@ void F66_DBF_Reader::slot_toF66_DBF_Old()
         }
 
         // Без этого будем смотреть на козяблики
-        QTextCodec  *codec866 = QTextCodec::codecForName( "CP866" );
-        QByteArray temp;
+        QTextCodec *codec866 = QTextCodec::codecForName( "CP866" );
+        QByteArray  temp;
         std::string stmp;
 
+        QStringList row_names;
         for(uint32_t i = 0; i < dbf_file.getRowsCount(); i++)
         {
+            // Проверка строк на статус "удалено"
+
+            if(dbf_file.rowDeleteStatus(i))
+                row_names.append(QString::number(i+1) + "DELETED");
+            else
+                row_names.append(QString::number(i+1) + "e");
+
             for(uint8_t j = 0; j < dbf_file.getColumnsCount(); j++)
             {
                 stmp = dbf_file.getElement(i, j);
                 temp = QByteArray(stmp.c_str());
-                m_ptwd_table->setItem(i, j, new QTableWidgetItem(codec866->toUnicode(temp) ));
+                m_ptwd_table->setItem(i, j, new QTableWidgetItem(codec866->toUnicode(temp) ));                    
             }
         }
+
+        m_ptwd_table->setVerticalHeaderLabels(row_names);
         m_ptxe_status->append("Succes!");
     }
     catch (char const *err)
