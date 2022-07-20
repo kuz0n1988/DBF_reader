@@ -1,5 +1,7 @@
 #include "dbfdescriptor.h"
 
+#include <cstring>
+
 DBFDescriptor::DBFDescriptor(const char *descriptor)
 {
     if(descriptor != nullptr)

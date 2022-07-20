@@ -1,5 +1,7 @@
 #include "dbftitle.h"
 
+#include <cstring>
+
 DBFTitle::DBFTitle(const char *title)
 {
     if(title != nullptr)
