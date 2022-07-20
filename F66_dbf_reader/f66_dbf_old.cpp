@@ -36,7 +36,12 @@ F66_DBF_Old::F66_DBF_Old(const QString &filepath) : m_filepath(filepath.toStdStr
 
         // ===== При наличии MEMO-файла создаём соответствующий объект
         if(m_title.getMemoFlag())
+        {
             m_memo = new DBFMemo(m_filepath);
+            qDebug () << "MEMO-file exist!";
+            qDebug () << "MEMO next aviable index: " << m_memo->getIndexOfNextAviable();
+            qDebug () << "MEMO data-block size is: " << m_memo->getSizeBlock() << " bytes";
+        }
 
         // Вот тут проверяем наличие закрывающего байта 0x0D для титульника.
         file.read(&byte, 1);
@@ -108,10 +113,7 @@ QList<std::string> F66_DBF_Old::getTable()
 
 std::string F66_DBF_Old::getElement(const unsigned int &row, const unsigned int &col)
 {
-    if(row < getRowsCount() && col < getColumnsCount())
-        return getElementFromFile(row, col);
-    else
-        throw "Out of range exception in getElement()";
+    return getElementFromFile(row, col);
 }
 
 std::string F66_DBF_Old::getElementFromFile(const uint32_t &row, const uint8_t &col)

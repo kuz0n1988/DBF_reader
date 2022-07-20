@@ -61,7 +61,7 @@ F66_DBF_Reader::F66_DBF_Reader(QWidget *parent)
 
     // Адресная строка
     m_pled_filename  = new QLineEdit(this);
-    m_pled_filename->setText("C:\\F_066\\DAN\\KOT16.DBF");
+    m_pled_filename->setText("C:\\F_066\\DAN\\DSKGD.DBF");
     m_pled_filename->setMinimumWidth(200);
 
     // Кнопка "открыть"
@@ -147,18 +147,18 @@ void F66_DBF_Reader::slot_toF66_DBF_Old()
         QStringList row_names;
         for(uint32_t i = 0; i < dbf_file.getRowsCount(); i++)
         {
-            // Проверка строк на статус "удалено"
+/*            // Проверка строк на статус "удалено"
 
             if(dbf_file.rowDeleteStatus(i))
                 row_names.append(QString::number(i+1) + "DELETED");
             else
                 row_names.append(QString::number(i+1) + "e");
-
+*/
             for(uint8_t j = 0; j < dbf_file.getColumnsCount(); j++)
             {
                 stmp = dbf_file.getElement(i, j);
                 temp = QByteArray(stmp.c_str());
-                m_ptwd_table->setItem(i, j, new QTableWidgetItem(codec866->toUnicode(temp) ));                    
+                m_ptwd_table->setItem(i, j, new QTableWidgetItem(codec866->toUnicode(temp)));
             }
         }
 
@@ -169,4 +169,10 @@ void F66_DBF_Reader::slot_toF66_DBF_Old()
     {   m_ptxe_status->append(QString::fromStdString(err));    }
     catch (const std::string &str)
     {   m_ptxe_status->append(QString::fromStdString(str));    }
+
+/*    QList<QByteArray> codecs = QTextCodec::availableCodecs();
+
+    for(int i = 0; i < codecs.length(); i++)
+        qDebug() << codecs.at(i);
+        */
 }

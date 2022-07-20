@@ -140,8 +140,36 @@
         {
         }
 
-======== ПРОВЕРКА НАЛИЧИЯ ФЛАГА "УДАЛЕНИЯ" ========
-
 ========== Закрывающий байт для файла ==========
 // Последний байт должен быть 0x1A. Если это не так
 // значит либо я дебил, либо (скорее всего) - файл битый
+
+========== MEMO-file ==========
+
+0x00	4	uint32	34	Index of next available data block (for appending data) (BIG ENDIAN)
+0x04	2	uint16	64	Block size in bytes
+0x06	506	 	 	(Reserved)
+---------- ЛОЖЬ-ПИЗДЁЖ!! ----------
+В моих древних DBF файлах размер блока хранится в следующих 4-х байтах.
+Правда, если допустить, что данные сидят "не на своих местах" (возможно, предполагалось
+там хранить какую-то информацию), то тогда всё сходится.
+СЛЕДОВАТЕЛЬНО, ПРАВИЛЬНАЯ СХЕМА ТАКОВА:
+0x00	4	uint32	34	Index of next available data block (for appending data) (BIG ENDIAN)
+0x06	2	uint16	64	Block size in bytes
+
+Reading a memo fields involves:
+* Determining the memo file block size, contained in the file header
+* Reading the block index from the record data in the .dbf file
+* Moving the read pointer to blocksize * index in the .mbt/.fpt file
+* Reading the memo field length
+* Reading the memo data and converting it to a string
+
+----- ВАЖНО!!! -----
+An important caveat follows. In the early versions of FoxBase and dBASE III, the memo index values
+stored in the record data are stored as strings. That is, an index value of 62, in a memo field with
+field length 10, is stored as 62 preceded by 8 spaces. In later versions, the memo index is stored in
+binary as a 32-bit integer value.
+
+Code can distinguish between these two storage approaches by determining the field length. When the
+field length is 4 bytes, then the memo index is stored as a binary integer value. When the field
+length is greater than 4 bytes, then the memo index is stored as a string.
