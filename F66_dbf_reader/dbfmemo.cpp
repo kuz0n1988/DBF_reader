@@ -26,10 +26,10 @@ DBFMemo::DBFMemo(const std::string& parent_filepath)
     if(file.is_open())
     {
         file.seekg(0);
-        char *temp_s = new char[8];
-        file.read(temp_s, 8);
+        char  *temp_s = new char[SIZE_TITLE_USEFUL];
+        file.read(temp_s, SIZE_TITLE_USEFUL);
 
-        for(int i = 0; i < 8; i++)
+        for(size_t i = 0; i < SIZE_TITLE_USEFUL; i++)
             qDebug() << i << "-element: " << temp_s[i];
 
         /* Последние четыре строчки я уже замахался по десятому разу переделывать
@@ -44,11 +44,20 @@ DBFMemo::DBFMemo(const std::string& parent_filepath)
          * Я уже думал, что может у меня файл не с того места читается, или он читается
          * как-то задом наперёд, но перебрав каждый элемент массива обнаружил, что читается
          * он как раз таки как надо!!! Значит собака зарыта где-то в memcpy. Но где????
-        */
-        memcpy(&m_index_of_next_aviable, &temp_s[0], 4);
+*/
+/*        memcpy(&m_index_of_next_aviable, &temp_s[0], 4);
         qDebug() << m_index_of_next_aviable;
         memcpy(&m_size_block, &temp_s[6], 2);
-        qDebug() << m_size_block;
+        qDebug() << m_size_block;        
+*/
+
+        m_index_of_next_aviable =   (uchar(temp_s[0]) << 24) +
+                                    (uchar(temp_s[1]) << 16) +
+                                    (uchar(temp_s[2]) << 8)  +
+                                    (uchar(temp_s[3]));
+        m_size_block            =   (uchar(temp_s[6]) << 8)  +
+                                    (uchar(temp_s[7]));
+
 
         delete [] temp_s;
     }
