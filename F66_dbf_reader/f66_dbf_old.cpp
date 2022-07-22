@@ -108,7 +108,7 @@ QList<std::string> F66_DBF_Old::getTable()
     QList<std::string> table;
     for(uint32_t i = 0; i < getRowsCount(); i++)
         for(uint8_t j = 0; j < getColumnsCount(); j++)
-            table.push_back(getElementFromFile(i, j));
+            table.push_back(getElement(i, j));
 
     return table;
 }
@@ -147,17 +147,25 @@ std::string F66_DBF_Old::getElementFromFile(const uint32_t &row, const uint8_t &
         file.seekg(pos);
         file.read(&result[0], getColumnLength(col));
 
-        /*
         if(getColumnType(col) == 'M')
-            DBFMemo memo(m_filepath);
-            */
+            result = getMEMOData(result);
 
         return result;
     }
     else
         throw "Can't open file";
+}
 
-    return "ZAGLUSHKA!";
+std::string F66_DBF_Old::getMEMOData(const std::string& idx)
+{
+    try
+    {
+        return m_memo->getMemoData(static_cast<uint32_t>(std::stoi(idx)));
+    }
+    catch (std::invalid_argument)   // для пустых MEMO-ячеек
+    {
+        return "";
+    }
 }
 
 bool F66_DBF_Old::rowDeleteStatus(const uint32_t &row)

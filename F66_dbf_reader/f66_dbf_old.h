@@ -7,8 +7,8 @@
 #include <QList>
 #include <QString>
 
-#include "dbftitle.h"       // класс для заголовка
-#include "dbfdescriptor.h"  // класс для дескриптора (описание колонки)
+#include "dbftitle.h"
+#include "dbfdescriptor.h"
 #include "dbfmemo.h"
 
 class F66_DBF_Old
@@ -21,6 +21,7 @@ private:    // члены
 
 private:    // методы
     std::string             getElementFromFile(const uint32_t &row, const uint8_t &col);
+    std::string             getMEMOData(const std::string& idx);
 
 public:
     F66_DBF_Old(const QString &filepath);

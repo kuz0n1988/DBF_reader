@@ -157,6 +157,13 @@
 0x00	4	uint32	34	Index of next available data block (for appending data) (BIG ENDIAN)
 0x06	2	uint16	64	Block size in bytes
 
+---------- Memo block structure ----------
+
+Offset	Size	Type	Sample value	Description
+0x00	4	uint32	1	Type
+0x04	4	uint32	64	Length of memo field
+0x08	-	 	 	Memo data
+
 Reading a memo fields involves:
 * Determining the memo file block size, contained in the file header
 * Reading the block index from the record data in the .dbf file

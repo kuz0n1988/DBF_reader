@@ -144,11 +144,10 @@ void F66_DBF_Reader::slot_toF66_DBF_Old()
         QByteArray  temp;
         std::string stmp;
 
-        QStringList row_names;
+//        QStringList row_names;
         for(uint32_t i = 0; i < dbf_file.getRowsCount(); i++)
         {
 /*            // Проверка строк на статус "удалено"
-
             if(dbf_file.rowDeleteStatus(i))
                 row_names.append(QString::number(i+1) + "DELETED");
             else
@@ -162,17 +161,11 @@ void F66_DBF_Reader::slot_toF66_DBF_Old()
             }
         }
 
-        m_ptwd_table->setVerticalHeaderLabels(row_names);
+//        m_ptwd_table->setVerticalHeaderLabels(row_names);
         m_ptxe_status->append("Succes!");
     }
     catch (char const *err)
     {   m_ptxe_status->append(QString::fromStdString(err));    }
     catch (const std::string &str)
     {   m_ptxe_status->append(QString::fromStdString(str));    }
-
-/*    QList<QByteArray> codecs = QTextCodec::availableCodecs();
-
-    for(int i = 0; i < codecs.length(); i++)
-        qDebug() << codecs.at(i);
-        */
 }

@@ -42,9 +42,9 @@ std::string DBFDescriptor::getDescriptorInfo()
     case 'F': info.append("Float");                     break;
     case 'N': info.append("Numeric (Float)");           break;
     case 'L': info.append("Logical (bool)");            break;
-    case 'T': info.append("DateTime (VoxPro type)");    break;
-    case 'I': info.append("Integer (VoxPro type)");     break;
-    case 'Y': info.append("Logical (VoxPro type)");     break;
+    case 'T': info.append("DateTime (FoxPro type)");    break;
+    case 'I': info.append("Integer (FoxPro type)");     break;
+    case 'Y': info.append("Logical (FoxPro type)");     break;
     case 'M': info.append("MEMO (index of memoblock)"); break;
     default:  info.append("Type not support: "); info += getType();
     }
