@@ -8,6 +8,9 @@
 #include <QDebug>
 #include <QString>
 
+const std::size_t DBFMemo::SIZE_TITLE        = 512;
+const std::size_t DBFMemo::SIZE_TITLE_USEFUL = 8;
+
 DBFMemo::DBFMemo(const std::string& parent_filepath)
 {
     std::string dbt = parent_filepath.substr(0, parent_filepath.length()-3) + "DBT";
@@ -48,8 +51,7 @@ DBFMemo::DBFMemo(const std::string& parent_filepath)
 /*        memcpy(&m_index_of_next_aviable, &temp_s[0], 4);
         qDebug() << m_index_of_next_aviable;
         memcpy(&m_size_block, &temp_s[6], 2);
-        qDebug() << m_size_block;        
-*/
+        qDebug() << m_size_block; */
 
         m_index_of_next_aviable =   (uchar(temp_s[0]) << 24) +
                                     (uchar(temp_s[1]) << 16) +
@@ -57,7 +59,6 @@ DBFMemo::DBFMemo(const std::string& parent_filepath)
                                     (uchar(temp_s[3]));
         m_size_block            =   (uchar(temp_s[6]) << 8)  +
                                     (uchar(temp_s[7]));
-
 
         delete [] temp_s;
     }
@@ -67,9 +68,12 @@ DBFMemo::DBFMemo(const std::string& parent_filepath)
     file.close();
 }
 
+DBFMemo::~DBFMemo(){}
+
 // Геттеры
 uint32_t DBFMemo::getIndexOfNextAviable()
 {   return m_index_of_next_aviable; }
 
 uint16_t DBFMemo::getSizeBlock()
 {   return m_size_block;    }
+

@@ -61,7 +61,7 @@ F66_DBF_Reader::F66_DBF_Reader(QWidget *parent)
 
     // Адресная строка
     m_pled_filename  = new QLineEdit(this);
-    m_pled_filename->setText("C:\\F_066\\DAN\\DSKGD.DBF");
+    m_pled_filename->setText("C:/F_066/PRG_FORM/FOXUSER.DBF");
     m_pled_filename->setMinimumWidth(200);
 
     // Кнопка "открыть"

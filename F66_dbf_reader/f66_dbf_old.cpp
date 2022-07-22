@@ -8,7 +8,9 @@
 #include <QDebug>
 
 // Монструозный конструктор. Надо бы разбить на методы
-F66_DBF_Old::F66_DBF_Old(const QString &filepath) : m_filepath(filepath.toStdString())
+F66_DBF_Old::F66_DBF_Old(const QString &filepath) :
+    m_filepath(filepath.toStdString()),
+    m_memo(nullptr)
 {
     char *memblock;         // массив для блока данных
     char byte;              // переменная для проверочных байтов

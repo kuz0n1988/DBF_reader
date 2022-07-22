@@ -9,7 +9,7 @@
 
 #include "dbftitle.h"       // класс для заголовка
 #include "dbfdescriptor.h"  // класс для дескриптора (описание колонки)
-#include "dbfmemo.h"        //
+#include "dbfmemo.h"
 
 class F66_DBF_Old
 {
@@ -17,7 +17,7 @@ private:    // члены
     DBFTitle                m_title;
     QList<DBFDescriptor>    m_descriptors;
     const std::string       m_filepath;
-    DBFMemo                *m_memo = nullptr;
+    DBFMemo                *m_memo;
 
 private:    // методы
     std::string             getElementFromFile(const uint32_t &row, const uint8_t &col);
